@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Finance Assistant</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #4a90e2;
+        }
+        .upload-form, .chat-box, .add-transaction-form {
+            margin-bottom: 20px;
+        }
+        .upload-form input, .add-transaction-form input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .upload-form button, .add-transaction-form button, #chat-input + button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .upload-form button:hover, .add-transaction-form button:hover, #chat-input + button:hover {
+            background: #357abd;
+        }
+        .chat-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 200px;
+            overflow-y: scroll;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .chat-message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .user-message {
+            background: #4a90e2;
+            color: white;
+            align-self: flex-end;
+        }
+        .bot-message {
+            background: #e0e0e0;
+            color: #333;
+            align-self: flex-start;
+        }
+        .summary {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .summary h2 {
+            color: #4a90e2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Personal Finance Assistant</h1>
+
+        <!-- File Upload Form -->
+        <form class="upload-form" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".csv, .xlsx" required>
+            <button type="submit">Upload and Analyze</button>
+        </form>
+
+        <!-- Chat Interface -->
+        <div class="chat-box" id="chat-box">
+            <div class="chat-message bot-message">Hello! How can I assist you with your finances today?</div>
+        </div>
+        <input type="text" id="chat-input" placeholder="Ask me about your finances...">
+        <button onclick="sendMessage()">Send</button>
+
+        <!-- Add Transaction Form -->
+        <h2>Add Manual Transaction</h2>
+        <form class="add-transaction-form" onsubmit="addTransaction(event)">
+            <input type="date" name="date" required>
+            <input type="text" name="description" placeholder="Description" required>
+            <input type="number" name="amount" step="0.01" placeholder="Amount" required>
+            <button type="submit">Add Transaction</button>
+        </form>
+
+        <!-- Financial Summary -->
+        {% if uploaded %}
+            <div class="summary">
+                <h2>Financial Summary</h2>
+                <p><strong>Total Income:</strong> ${{ summary.total_income }}</p>
+                <p><strong>Total Expenses:</strong> ${{ summary.total_expenses }}</p>
+                <p><strong>Savings Rate:</strong> {{ summary.savings_rate }}%</p>
+                <h3>Monthly Expenses</h3>
+                <ul>
+                    {% for month, amount in summary.monthly_expenses.items() %}
+                        <li>{{ month }}: ${{ amount }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Function to send chat messages
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const chatBox = document.getElementById('chat-box');
+
+            // Display user message
+            chatBox.innerHTML += `<div class="chat-message user-message">You: ${input.value}</div>`;
+
+            // Send message to the server
+            fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: input.value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display bot response
+                chatBox.innerHTML += `<div class="chat-message bot-message">Bot: ${data.response}</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom
+            });
+
+            input.value = ''; // Clear input
+        }
+
+        // Function to add manual transactions
+        function addTransaction(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            fetch('/add_transaction', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    date: formData.get('date'),
+                    description: formData.get('description'),
+                    amount: formData.get('amount')
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message); // Show success/error message
+                form.reset(); // Reset form
+            });
+        }
+    </script>
+</body>
+</html>
