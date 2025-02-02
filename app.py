@@ -15,7 +15,7 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 
 # Set Groq API key
-os.environ["GROQ_API_KEY"] = "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"
+os.environ["GROQ_API_KEY"] = ""
 client = Groq()
 
 # Global variable to store transactions
