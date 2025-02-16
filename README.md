@@ -1,4 +1,4 @@
-### Personal Finance Assistant AI Agent.
+## 💸💵Personal Finance Assistant AI Agent.
 
 The Personal Finance Assistant AI Agent is a web-based application that helps users manage their finances. It allows users to upload transaction data (CSV or Excel files), analyze their financial data, and interact with an AI-powered chatbot for financial insights. The app also supports manual transaction updates and provides financial summaries.
 
